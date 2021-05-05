@@ -73,6 +73,8 @@ int main(void)
 	// State variable
 	int Display_Cryptos = 0;
 	int Configure_Alarm = 1;
+	int Read_From_Bt = 2;
+	
 	int state = Display_Cryptos;
 	
 	// storage variables
@@ -92,7 +94,9 @@ int main(void)
     lcd_E_ddr |= (1<<lcd_E_bit);        // Enable
     lcd_RS_ddr |= (1<<lcd_RS_bit);    // Register Select
 
+	// init lcd and usart
     lcd_init();
+	usart_init();
 
 	// Type welcome message
     lcd_write_str("Welcome to");
@@ -108,6 +112,30 @@ int main(void)
 	int debug = 0;
     // program loop
     while(1){
+		
+		/*// debug loop
+		while(1){
+			char buffer[10];
+			char input_str;
+			uint16_t input = usart_rx();
+			itoa(input, buffer, 10);
+			input_str = atoi(buffer);
+			
+			lcd_write_instruction(lcd_Clear);
+			_delay_ms(80);
+			lcd_write_str(input_str);
+			_delay_ms(2000);
+		}*/
+		while(1){
+			char input_str[10] = {};
+			get_string(input_str);
+			
+			lcd_write_str(input_str);
+			_delay_ms(5000);
+			lcd_write_instruction(lcd_Clear);
+			_delay_ms(80);
+		}
+		
 		if(state == Display_Cryptos){
 			
 			lcd_write_str(cryptos[currentCrypto]);
@@ -131,10 +159,17 @@ int main(void)
 			char snum[10];
 			itoa(alarmPercent, snum, 10);
 			lcd_write_str(snum);
-			_delay_ms(10000);
-		}      
+			//_delay_ms(10000);
+		}else if(state == Read_From_Bt){
+			// read the new input
+			char input_str[10] = {};
+			char output_str[20];
+			get_string(input_str);
+			lcd_write_str(input_str);
+			
+		}
 		      
-		_delay_ms(5000);
+		//_delay_ms(5000);
 		lcd_write_instruction(lcd_Clear);
 		_delay_ms(80);
     }
@@ -162,7 +197,6 @@ void usart_init(void)
 /////////////////////////////////////////////////
 // function: usart_rx
 // purpose: receives data from bluetooth module
-// TODO: update to take data from bluetooth instead of serial port
 /////////////////////////////////////////////////
 uint16_t usart_rx(void)
 {
@@ -175,7 +209,6 @@ uint16_t usart_rx(void)
 /////////////////////////////////////////////////
 // function: get_string
 // purpose: gets string from bluetooth module
-// TODO: edit so that it takes data from bluetooth instead of serial port
 /////////////////////////////////////////////////
 const char* get_string(char input_str[]){
 	char buffer[10];
@@ -184,7 +217,6 @@ const char* get_string(char input_str[]){
 	int i = 0;
 	while (input != 10){
 		itoa(input, buffer, 10);
-		//print(buffer);
 		input_str[i] = atoi(buffer);
 		i = i + 1;
 		input = usart_rx();
