@@ -69,12 +69,18 @@ void move_to_line_2(void);
 // Purpose: moves cursor to line 2
 /////////////////////////////////////////////////
 int main(void)
-{
+{	
+	// State variable
+	int Display_Cryptos = 0;
+	int Configure_Alarm = 1;
+	int state = Display_Cryptos;
+	
 	// storage variables
 	int alarmPercent = 10; // default alarm to 10 percent change
 	int currentCrypto = 1; // 0 denotes bitcoin, 1 denotes eth. Add more if more supported cryptos are added
 	char cryptos[2][10] = { "Bitcoin",		// supported crypto names. Index = current crypto int
 							"Ethereum"};
+	char prices[2][10] = {"54802.80", "3286.23"}; 
 	
 	// configure the data lines for output to LCD
     lcd_D7_ddr |= (1<<lcd_D7_bit);
@@ -99,18 +105,35 @@ int main(void)
 	lcd_write_instruction(lcd_Clear);
 	_delay_ms(80);
 	
+	int debug = 0;
     // program loop
     while(1){
-		lcd_write_str(cryptos[currentCrypto]);
-		
-		if(currentCrypto == 0)
-		{
-			currentCrypto = 1;
-		}else
-		{
-			currentCrypto = 0;
-		}
-		
+		if(state == Display_Cryptos){
+			
+			lcd_write_str(cryptos[currentCrypto]);
+		    move_to_line_2();
+		    lcd_write_str(prices[currentCrypto]);
+		            
+		    if(currentCrypto == 0)
+		    {
+			    currentCrypto = 1;
+				debug = 3;
+		    }else
+		    {
+			    currentCrypto = 0;
+		    }
+			if(debug == 3){
+				state = Configure_Alarm;
+			}
+		}else if(state == Configure_Alarm){
+			lcd_write_str("Set Alarm:");
+			move_to_line_2();
+			char snum[10];
+			itoa(alarmPercent, snum, 10);
+			lcd_write_str(snum);
+			_delay_ms(10000);
+		}      
+		      
 		_delay_ms(5000);
 		lcd_write_instruction(lcd_Clear);
 		_delay_ms(80);
