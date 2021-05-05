@@ -1,6 +1,12 @@
 from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
+import time
+import serial 
+
+
+###################
+# API stuff
 
 # real data
 API_KEY = 'e4e16906-0114-410b-85c3-9f7a978e0500'
@@ -17,26 +23,43 @@ parameters = {
 }
 headers = {
   'Accepts': 'application/json',
-  'X-CMC_PRO_API_KEY': API_KEY,  # change to API_KEY for real data
+  'X-CMC_PRO_API_KEY': TEST_KEY,  # change to API_KEY for real data
 }
 
 session = Session()
 session.headers.update(headers)
 
-try:
-  response = session.get(API_URL, params=parameters) # change to API_URL for real data
-  data = json.loads(response.text)
-except (ConnectionError, Timeout, TooManyRedirects) as e:
-  print(e)
+def getData():
+  try:
+    response = session.get(TEST_URL, params=parameters) # change to API_URL for real data
+    data = json.loads(response.text)
+    return data
+  except (ConnectionError, Timeout, TooManyRedirects) as e:
+    print(e)
 
 
-BTC_data = data['data'][0] # Bitcoin data
-ETH_data = data['data'][1] # Ethereum data
+#BTC_data = data['data'][0] # Bitcoin data
+#ETH_data = data['data'][1] # Ethereum data
 
-BTC_price = BTC_data['quote']['USD']['price'] # get BTC price
-ETH_price = ETH_data['quote']['USD']['price'] # get ETH price
+#BTC_price = BTC_data['quote']['USD']['price'] # get BTC price
+#ETH_price = ETH_data['quote']['USD']['price'] # get ETH price
 
 
-print('BTC: ', BTC_price, '\n') # print BTC price
-print('ETH: ', ETH_price, '\n') # print ETH price
+#print('BTC: ', BTC_price, '\n') # print BTC price
+#print('ETH: ', ETH_price, '\n') # print ETH price
+###################
+
+##################
+# Serial stuff
+arduino = serial.Serial(port = 'COM4', baudrate=9600, timeout = .1)
+def write_data(x):
+  arduino.write(bytes(x, 'utf-8'))
+  time.sleep(0.05)
+
+#####################
+
+
+
+
+
 

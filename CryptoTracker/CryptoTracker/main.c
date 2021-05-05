@@ -176,6 +176,7 @@ int main(void)
     return 0;
 } ///////////////////// END OF MAIN //////////////////////////
 
+
 /////////////////////////////////////////////////
 // function: usart_init
 // purpose: initialize usart.
@@ -215,7 +216,7 @@ const char* get_string(char input_str[]){
 	uint16_t input = usart_rx();
 	
 	int i = 0;
-	while (input != 10){
+	while (input != '\n'){
 		itoa(input, buffer, 10);
 		input_str[i] = atoi(buffer);
 		i = i + 1;

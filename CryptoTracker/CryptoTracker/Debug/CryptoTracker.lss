@@ -159,7 +159,7 @@ const char* get_string(char input_str[]){
 	int i = 0;
   ec:	00 e0       	ldi	r16, 0x00	; 0
   ee:	10 e0       	ldi	r17, 0x00	; 0
-	while (input != 10){
+	while (input != '\n'){
   f0:	14 c0       	rjmp	.+40     	; 0x11a <get_string+0x54>
 		itoa(input, buffer, 10);
   f2:	4a e0       	ldi	r20, 0x0A	; 10
@@ -187,7 +187,7 @@ const char* get_string(char input_str[]){
 	uint16_t input = usart_rx();
 	
 	int i = 0;
-	while (input != 10){
+	while (input != '\n'){
  11a:	8a 30       	cpi	r24, 0x0A	; 10
  11c:	91 05       	cpc	r25, r1
  11e:	49 f7       	brne	.-46     	; 0xf2 <get_string+0x2c>
