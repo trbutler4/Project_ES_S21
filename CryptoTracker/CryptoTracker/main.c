@@ -15,28 +15,28 @@
 #define UBRR_VALUE (((F_CPU / (USART_BAUDRATE * 16UL))) -1)
 
 // LCD interface definitions
-#define lcd_D7_port     PORTD                   // lcd D7 connection
-#define lcd_D7_bit      PORTD7
-#define lcd_D7_ddr      DDRD
+#define lcd_D7_port     PORTC                   // lcd D7 connection
+#define lcd_D7_bit      PORTC3
+#define lcd_D7_ddr      DDRC
 
-#define lcd_D6_port     PORTD                   // lcd D6 connection
-#define lcd_D6_bit      PORTD6
-#define lcd_D6_ddr      DDRD
+#define lcd_D6_port     PORTC                   // lcd D6 connection
+#define lcd_D6_bit      PORTC2
+#define lcd_D6_ddr      DDRC
 
-#define lcd_D5_port     PORTD                   // lcd D5 connection
-#define lcd_D5_bit      PORTD5
-#define lcd_D5_ddr      DDRD
+#define lcd_D5_port     PORTC                   // lcd D5 connection
+#define lcd_D5_bit      PORTC1
+#define lcd_D5_ddr      DDRC
 
-#define lcd_D4_port     PORTD                   // lcd D4 connection
-#define lcd_D4_bit      PORTD4
-#define lcd_D4_ddr      DDRD
+#define lcd_D4_port     PORTC                   // lcd D4 connection
+#define lcd_D4_bit      PORTC0
+#define lcd_D4_ddr      DDRC
 
 #define lcd_E_port      PORTB                   // lcd Enable pin
-#define lcd_E_bit       PORTB1
+#define lcd_E_bit       PORTB3
 #define lcd_E_ddr       DDRB
 
 #define lcd_RS_port     PORTB                   // lcd Register Select pin
-#define lcd_RS_bit      PORTB0
+#define lcd_RS_bit      PORTB5
 #define lcd_RS_ddr      DDRB
 
 // LCD specific definitions
