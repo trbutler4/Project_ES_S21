@@ -9,6 +9,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 // USART stuff
 #define USART_BAUDRATE 9600
@@ -64,22 +65,16 @@ void lcd_write_str(uint8_t *);
 void lcd_init(void);
 void move_to_line_2(void);
 
+int currentCrypto = 0; // 0 denotes bitcoin, 1 denotes eth. Global for interrupt access
+
 /////////////////////////////////////////////////
 // Function: move_to_line_2
 // Purpose: moves cursor to line 2
 /////////////////////////////////////////////////
 int main(void)
 {	
-	// State variable
-	int Display_Cryptos = 0;
-	int Configure_Alarm = 1;
-	int Read_From_Bt = 2;
-	
-	int state = Display_Cryptos;
-	
 	// storage variables
 	int alarmPercent = 10; // default alarm to 10 percent change
-	int currentCrypto = 1; // 0 denotes bitcoin, 1 denotes eth. Add more if more supported cryptos are added
 	char cryptos[2][10] = { "Bitcoin",		// supported crypto names. Index = current crypto int
 							"Ethereum"};
 	char prices[2][10] = {"54802.80", "3286.23"}; 
@@ -109,66 +104,24 @@ int main(void)
 	lcd_write_instruction(lcd_Clear);
 	_delay_ms(80);
 	
+	// set INT0 to trigger on ANY logic change
+	EICRA |= (1 << ISC00);
+	EIMSK |= (1 << INT0);
+	sei();
+	
 	int debug = 0;
-    // program loop
+	
+    // main program loop
     while(1){
-		
-		/*// debug loop
-		while(1){
-			char buffer[10];
-			char input_str;
-			uint16_t input = usart_rx();
-			itoa(input, buffer, 10);
-			input_str = atoi(buffer);
 			
-			lcd_write_instruction(lcd_Clear);
-			_delay_ms(80);
-			lcd_write_str(input_str);
-			_delay_ms(2000);
-		}*/
-		while(1){
-			char input_str[10] = {};
-			get_string(input_str);
-			
-			lcd_write_str(input_str);
-			_delay_ms(5000);
-			lcd_write_instruction(lcd_Clear);
-			_delay_ms(80);
-		}
-		
-		if(state == Display_Cryptos){
-			
-			lcd_write_str(cryptos[currentCrypto]);
-		    move_to_line_2();
-		    lcd_write_str(prices[currentCrypto]);
-		            
-		    if(currentCrypto == 0)
-		    {
-			    currentCrypto = 1;
-				debug = 3;
-		    }else
-		    {
-			    currentCrypto = 0;
-		    }
-			if(debug == 3){
-				state = Configure_Alarm;
-			}
-		}else if(state == Configure_Alarm){
-			lcd_write_str("Set Alarm:");
-			move_to_line_2();
-			char snum[10];
-			itoa(alarmPercent, snum, 10);
-			lcd_write_str(snum);
-			//_delay_ms(10000);
-		}else if(state == Read_From_Bt){
-			// read the new input
-			char input_str[10] = {};
-			char output_str[20];
-			get_string(input_str);
-			lcd_write_str(input_str);
-			
-		}
+		lcd_write_str(cryptos[currentCrypto]);
+		move_to_line_2();
+		lcd_write_str(prices[currentCrypto]);
 		      
+		// update prices
+		char input_str[10] = {};
+		get_string(input_str);
+			  
 		//_delay_ms(5000);
 		lcd_write_instruction(lcd_Clear);
 		_delay_ms(80);
@@ -176,7 +129,20 @@ int main(void)
     return 0;
 } ///////////////////// END OF MAIN //////////////////////////
 
-
+/////////////////////////////////////////////////
+// function: ISR()
+/////////////////////////////////////////////////
+ISR(INT0_vect)
+{
+	switch(currentCrypto){
+		case 0:
+			currentCrypto = 1;
+			break;
+		case 1:
+			currentCrypto = 0;
+			break;
+	}
+}
 /////////////////////////////////////////////////
 // function: usart_init
 // purpose: initialize usart.
