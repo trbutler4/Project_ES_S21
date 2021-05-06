@@ -15,6 +15,11 @@
 #define USART_BAUDRATE 9600
 #define UBRR_VALUE (((F_CPU / (USART_BAUDRATE * 16UL))) -1)
 
+// Alarm definitions
+#define alarm_port		PORTB					// alarm connection
+#define alarm_bit		PORTB0
+#define alarm_ddr		DDRB
+
 // LCD interface definitions
 #define lcd_D7_port     PORTC                   // lcd D7 connection
 #define lcd_D7_bit      PORTC3
@@ -64,6 +69,7 @@ void lcd_write_char(uint8_t);
 void lcd_write_str(uint8_t *);
 void lcd_init(void);
 void move_to_line_2(void);
+void alarm();
 
 int currentCrypto = 0; // 0 denotes bitcoin, 1 denotes eth. Global for interrupt access
 
@@ -84,6 +90,10 @@ int main(void)
     lcd_D6_ddr |= (1<<lcd_D6_bit);
     lcd_D5_ddr |= (1<<lcd_D5_bit);
     lcd_D4_ddr |= (1<<lcd_D4_bit);
+	
+	// configure data lines for output to alarm
+	alarm_ddr |= (1<<alarm_bit);
+	
 
 	// configure the data lines for controlling the LCD
     lcd_E_ddr |= (1<<lcd_E_bit);        // Enable
@@ -108,9 +118,7 @@ int main(void)
 	EICRA |= (1 << ISC00);
 	EIMSK |= (1 << INT0);
 	sei();
-	
-	int debug = 0;
-	
+
     // main program loop
     while(1){
 			
@@ -131,6 +139,7 @@ int main(void)
 
 /////////////////////////////////////////////////
 // function: ISR()
+// purpose: toggles the current crypto via interrupt
 /////////////////////////////////////////////////
 ISR(INT0_vect)
 {
@@ -143,6 +152,24 @@ ISR(INT0_vect)
 			break;
 	}
 }
+
+/////////////////////////////////////////////////
+// function: alarm
+// purpose: sounds the alarm that the price dropped 
+//			> 10 percent
+/////////////////////////////////////////////////
+void alarm()
+{
+	int i = 0;
+	for(i; i < 10; i+=1){
+		alarm_port |= (1<<alarm_bit);// turn alarm on
+		_delay_ms(150);
+		alarm_port &= ~(1<<alarm_bit);// turn alarm off
+		_delay_ms(150);
+	}
+}
+
+
 /////////////////////////////////////////////////
 // function: usart_init
 // purpose: initialize usart.
