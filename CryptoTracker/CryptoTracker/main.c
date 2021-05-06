@@ -128,17 +128,14 @@ int main(void)
 		char input_str[50];
 		get_string(input_str);
 		store_prices(input_str,prices);
-			
-		lcd_write_str(prices[0]);
-		_delay_ms(5000);
-		lcd_write_instruction(lcd_Clear);
-		_delay_ms(80);
-		lcd_write_str(prices[1]);
-		_delay_ms(5000);
-		lcd_write_instruction(lcd_Clear);
-		_delay_ms(80);
-	
 		
+		lcd_write_instruction(lcd_Clear);
+		_delay_ms(80);
+		
+		lcd_write_str(cryptos[currentCrypto]);
+		move_to_line_2();
+		_delay_ms(80);
+		lcd_write_str(prices[currentCrypto]);
     }
     return 0;
 } ///////////////////// END OF MAIN //////////////////////////
@@ -216,7 +213,7 @@ const char* get_string(char input_str[]){
 	uint16_t input = usart_rx();
 	
 	int i = 0;
-	while (input != 'x'){
+	while (input != '\n'){
 		itoa(input, buffer, 10);
 		input_str[i] = atoi(buffer);
 		i = i + 1;
