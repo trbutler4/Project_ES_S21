@@ -120,8 +120,8 @@ int main(void)
 	lcd_write_instruction(lcd_Clear);
 	_delay_ms(80);
 	
-	// set INT0 to trigger on ANY logic change
-	EICRA |= (1 << ISC00);
+	// set INT0 to trigger on rising edge
+	EICRA |= (1 << ISC00) | (1 << ISC01);
 	EIMSK |= (1 << INT0);
 	sei();
 
@@ -140,7 +140,7 @@ int main(void)
 		}
 		
 		// check for a need to alarm
-		if(previousPrice < atof(prices[currentCrypto])){
+		if(previousPrice > atof(prices[currentCrypto])){
 			alarm();
 		}
 		
