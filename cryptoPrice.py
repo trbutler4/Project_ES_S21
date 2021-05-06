@@ -64,8 +64,7 @@ def formatString():
   for i in range(0,2):
     price = data['data'][i]['quote']['USD']['price']
     toSend = toSend + str(round(price)) + ','
-  toSend = toSend[:len(toSend)-1]
-  toSend = toSend + 'x'
+  toSend = toSend + '\n'
   return toSend
 
 
