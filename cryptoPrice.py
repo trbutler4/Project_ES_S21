@@ -37,7 +37,6 @@ def getData():
   except (ConnectionError, Timeout, TooManyRedirects) as e:
     print(e)
 
-
 #BTC_data = data['data'][0] # Bitcoin data
 #ETH_data = data['data'][1] # Ethereum data
 
@@ -52,11 +51,29 @@ def getData():
 ##################
 # Serial stuff
 arduino = serial.Serial(port = 'COM4', baudrate=9600, timeout = .1)
-def write_data(x):
-  arduino.write(bytes(x, 'utf-8'))
-  time.sleep(0.05)
+def write(x):
+    arduino.write(bytes(x, 'utf-8'))
+    time.sleep(0.05)
 
 #####################
+
+
+def formatString():
+  data = getData()
+  toSend = ''
+  for i in range(0,2):
+    price = data['data'][i]['quote']['USD']['price']
+    toSend = toSend + str(round(price)) + ','
+  toSend = toSend[:len(toSend)-1]
+  toSend = toSend + 'x'
+  return toSend
+
+
+while True:
+ write(formatString())
+ time.sleep(30)
+
+
 
 
 

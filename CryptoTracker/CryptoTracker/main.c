@@ -9,6 +9,8 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <string.h>
+#include <stdio.h>
 
 // USART stuff
 #define USART_BAUDRATE 9600
@@ -55,6 +57,7 @@
 
 // Prototypes
 const char* get_string(char input_str[]);
+char* store_prices(const char str[], char price_array[10][10]);
 uint16_t usart_rx(void);
 void usart_init(void);
 void lcd_write(uint8_t);
@@ -81,8 +84,8 @@ int main(void)
 	int alarmPercent = 10; // default alarm to 10 percent change
 	int currentCrypto = 1; // 0 denotes bitcoin, 1 denotes eth. Add more if more supported cryptos are added
 	char cryptos[2][10] = { "Bitcoin",		// supported crypto names. Index = current crypto int
-							"Ethereum"};
-	char prices[2][10] = {"54802.80", "3286.23"}; 
+					"Ethereum"};
+	char prices[10][10];
 	
 	// configure the data lines for output to LCD
     lcd_D7_ddr |= (1<<lcd_D7_bit);
@@ -126,11 +129,18 @@ int main(void)
 			lcd_write_str(input_str);
 			_delay_ms(2000);
 		}*/
+		char input_str[10];
 		while(1){
-			char input_str[10] = {};
+			// wait for prices to update
+			char input_str[50];
 			get_string(input_str);
+			store_prices(input_str,prices);
 			
-			lcd_write_str(input_str);
+			lcd_write_str(prices[0]);
+			_delay_ms(5000);
+			lcd_write_instruction(lcd_Clear);
+			_delay_ms(80);
+			lcd_write_str(prices[1]);
 			_delay_ms(5000);
 			lcd_write_instruction(lcd_Clear);
 			_delay_ms(80);
@@ -207,6 +217,7 @@ uint16_t usart_rx(void)
 	return UDR0;
 }
 
+
 /////////////////////////////////////////////////
 // function: get_string
 // purpose: gets string from bluetooth module
@@ -216,7 +227,7 @@ const char* get_string(char input_str[]){
 	uint16_t input = usart_rx();
 	
 	int i = 0;
-	while (input != '\n'){
+	while (input != 'x'){
 		itoa(input, buffer, 10);
 		input_str[i] = atoi(buffer);
 		i = i + 1;
@@ -224,6 +235,28 @@ const char* get_string(char input_str[]){
 	}
 	
 	return input_str;
+}
+
+//////////////////////////
+// function: store_prices
+// purpose: gets price string and converts string to array of prices
+char* store_prices(const char str[], char price_array[10][10]){
+	const char s[2] = ",";
+	char *token;
+	int i = 0;
+	char buffer[10];
+	/* get the first token */
+	token = strtok(str, s);
+	
+	/* walk through other tokens */
+	while( token != NULL ) {
+		sprintf(price_array[i], " %s\n", token );
+		
+		i = i + 1;
+		token = strtok(NULL, s);
+	}
+	
+	return price_array;
 }
 
 /////////////////////////////////////////////////
