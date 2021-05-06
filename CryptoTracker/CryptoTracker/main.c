@@ -9,12 +9,9 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
-<<<<<<< HEAD
 #include <string.h>
 #include <stdio.h>
-=======
 #include <avr/interrupt.h>
->>>>>>> afed9a2d79a01b36798a43cb67ac14440292a569
 
 // USART stuff
 #define USART_BAUDRATE 9600
@@ -127,53 +124,21 @@ int main(void)
 
     // main program loop
     while(1){
-<<<<<<< HEAD
-		
-		/*// debug loop
-		while(1){
-			char buffer[10];
-			char input_str;
-			uint16_t input = usart_rx();
-			itoa(input, buffer, 10);
-			input_str = atoi(buffer);
-			
-			lcd_write_instruction(lcd_Clear);
-			_delay_ms(80);
-			lcd_write_str(input_str);
-			_delay_ms(2000);
-		}*/
-		char input_str[10];
-		while(1){
-			// wait for prices to update
-			char input_str[50];
-			get_string(input_str);
-			store_prices(input_str,prices);
-			
-			lcd_write_str(prices[0]);
-			_delay_ms(5000);
-			lcd_write_instruction(lcd_Clear);
-			_delay_ms(80);
-			lcd_write_str(prices[1]);
-			_delay_ms(5000);
-			lcd_write_instruction(lcd_Clear);
-			_delay_ms(80);
-		}
-		
-		if(state == Display_Cryptos){
-=======
->>>>>>> afed9a2d79a01b36798a43cb67ac14440292a569
-			
-		lcd_write_str(cryptos[currentCrypto]);
-		move_to_line_2();
-		lcd_write_str(prices[currentCrypto]);
-		      
-		// update prices
-		char input_str[10] = {};
+		// wait for prices to update
+		char input_str[50];
 		get_string(input_str);
-			  
-		//_delay_ms(5000);
+		store_prices(input_str,prices);
+			
+		lcd_write_str(prices[0]);
+		_delay_ms(5000);
 		lcd_write_instruction(lcd_Clear);
 		_delay_ms(80);
+		lcd_write_str(prices[1]);
+		_delay_ms(5000);
+		lcd_write_instruction(lcd_Clear);
+		_delay_ms(80);
+	
+		
     }
     return 0;
 } ///////////////////// END OF MAIN //////////////////////////
@@ -274,7 +239,7 @@ char* store_prices(const char str[], char price_array[10][10]){
 	
 	/* walk through other tokens */
 	while( token != NULL ) {
-		sprintf(price_array[i], " %s\n", token );
+		sprintf(price_array[i], " %s", token );
 		
 		i = i + 1;
 		token = strtok(NULL, s);
