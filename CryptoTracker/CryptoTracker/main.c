@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <avr/interrupt.h>
+#include <stdlib.h>
 
 // USART stuff
 #define USART_BAUDRATE 9600
@@ -75,6 +76,7 @@ void move_to_line_2(void);
 void alarm();
 
 int currentCrypto = 0; // 0 denotes bitcoin, 1 denotes eth. Global for interrupt access
+int resetPrice = 1; // changed to 1 when currentCrypto changes to get a starting price for alarm.
 
 /////////////////////////////////////////////////
 // Function: move_to_line_2
@@ -83,10 +85,11 @@ int currentCrypto = 0; // 0 denotes bitcoin, 1 denotes eth. Global for interrupt
 int main(void)
 {	
 	// storage variables
-	int alarmPercent = 10; // default alarm to 10 percent change
 	char cryptos[2][10] = { "Bitcoin",		// supported crypto names. Index = current crypto int
-					"Ethereum"};
+							"Ethereum"};
 	char prices[10][10];
+	
+	double previousPrice = 0; // previous price of currently viewed crypto. Used for alarm
 	
 	// configure the data lines for output to LCD
     lcd_D7_ddr |= (1<<lcd_D7_bit);
@@ -129,6 +132,21 @@ int main(void)
 		get_string(input_str);
 		store_prices(input_str,prices);
 		
+		// reset the previous price before checking alarm if resetPrice flag is set
+		// and then set flag to zero
+		if(resetPrice == 1){
+			previousPrice = atof(prices[currentCrypto]);
+			resetPrice = 0;
+		}
+		
+		// check for a need to alarm
+		if(previousPrice < atof(prices[currentCrypto])){
+			alarm();
+		}
+		
+		// either way, set previous price to the new price
+		previousPrice = atof(prices[currentCrypto]);
+		
 		lcd_write_instruction(lcd_Clear);
 		_delay_ms(80);
 		
@@ -154,6 +172,7 @@ ISR(INT0_vect)
 			currentCrypto = 0;
 			break;
 	}
+	resetPrice = 1;
 }
 
 /////////////////////////////////////////////////
