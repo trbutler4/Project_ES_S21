@@ -9,12 +9,21 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+<<<<<<< HEAD
 #include <string.h>
 #include <stdio.h>
+=======
+#include <avr/interrupt.h>
+>>>>>>> afed9a2d79a01b36798a43cb67ac14440292a569
 
 // USART stuff
 #define USART_BAUDRATE 9600
 #define UBRR_VALUE (((F_CPU / (USART_BAUDRATE * 16UL))) -1)
+
+// Alarm definitions
+#define alarm_port		PORTB					// alarm connection
+#define alarm_bit		PORTB0
+#define alarm_ddr		DDRB
 
 // LCD interface definitions
 #define lcd_D7_port     PORTC                   // lcd D7 connection
@@ -66,6 +75,9 @@ void lcd_write_char(uint8_t);
 void lcd_write_str(uint8_t *);
 void lcd_init(void);
 void move_to_line_2(void);
+void alarm();
+
+int currentCrypto = 0; // 0 denotes bitcoin, 1 denotes eth. Global for interrupt access
 
 /////////////////////////////////////////////////
 // Function: move_to_line_2
@@ -73,16 +85,8 @@ void move_to_line_2(void);
 /////////////////////////////////////////////////
 int main(void)
 {	
-	// State variable
-	int Display_Cryptos = 0;
-	int Configure_Alarm = 1;
-	int Read_From_Bt = 2;
-	
-	int state = Display_Cryptos;
-	
 	// storage variables
 	int alarmPercent = 10; // default alarm to 10 percent change
-	int currentCrypto = 1; // 0 denotes bitcoin, 1 denotes eth. Add more if more supported cryptos are added
 	char cryptos[2][10] = { "Bitcoin",		// supported crypto names. Index = current crypto int
 					"Ethereum"};
 	char prices[10][10];
@@ -92,6 +96,10 @@ int main(void)
     lcd_D6_ddr |= (1<<lcd_D6_bit);
     lcd_D5_ddr |= (1<<lcd_D5_bit);
     lcd_D4_ddr |= (1<<lcd_D4_bit);
+	
+	// configure data lines for output to alarm
+	alarm_ddr |= (1<<alarm_bit);
+	
 
 	// configure the data lines for controlling the LCD
     lcd_E_ddr |= (1<<lcd_E_bit);        // Enable
@@ -112,9 +120,14 @@ int main(void)
 	lcd_write_instruction(lcd_Clear);
 	_delay_ms(80);
 	
-	int debug = 0;
-    // program loop
+	// set INT0 to trigger on ANY logic change
+	EICRA |= (1 << ISC00);
+	EIMSK |= (1 << INT0);
+	sei();
+
+    // main program loop
     while(1){
+<<<<<<< HEAD
 		
 		/*// debug loop
 		while(1){
@@ -147,44 +160,55 @@ int main(void)
 		}
 		
 		if(state == Display_Cryptos){
+=======
+>>>>>>> afed9a2d79a01b36798a43cb67ac14440292a569
 			
-			lcd_write_str(cryptos[currentCrypto]);
-		    move_to_line_2();
-		    lcd_write_str(prices[currentCrypto]);
-		            
-		    if(currentCrypto == 0)
-		    {
-			    currentCrypto = 1;
-				debug = 3;
-		    }else
-		    {
-			    currentCrypto = 0;
-		    }
-			if(debug == 3){
-				state = Configure_Alarm;
-			}
-		}else if(state == Configure_Alarm){
-			lcd_write_str("Set Alarm:");
-			move_to_line_2();
-			char snum[10];
-			itoa(alarmPercent, snum, 10);
-			lcd_write_str(snum);
-			//_delay_ms(10000);
-		}else if(state == Read_From_Bt){
-			// read the new input
-			char input_str[10] = {};
-			char output_str[20];
-			get_string(input_str);
-			lcd_write_str(input_str);
-			
-		}
+		lcd_write_str(cryptos[currentCrypto]);
+		move_to_line_2();
+		lcd_write_str(prices[currentCrypto]);
 		      
+		// update prices
+		char input_str[10] = {};
+		get_string(input_str);
+			  
 		//_delay_ms(5000);
 		lcd_write_instruction(lcd_Clear);
 		_delay_ms(80);
     }
     return 0;
 } ///////////////////// END OF MAIN //////////////////////////
+
+/////////////////////////////////////////////////
+// function: ISR()
+// purpose: toggles the current crypto via interrupt
+/////////////////////////////////////////////////
+ISR(INT0_vect)
+{
+	switch(currentCrypto){
+		case 0:
+			currentCrypto = 1;
+			break;
+		case 1:
+			currentCrypto = 0;
+			break;
+	}
+}
+
+/////////////////////////////////////////////////
+// function: alarm
+// purpose: sounds the alarm that the price dropped 
+//			> 10 percent
+/////////////////////////////////////////////////
+void alarm()
+{
+	int i = 0;
+	for(i; i < 10; i+=1){
+		alarm_port |= (1<<alarm_bit);// turn alarm on
+		_delay_ms(150);
+		alarm_port &= ~(1<<alarm_bit);// turn alarm off
+		_delay_ms(150);
+	}
+}
 
 
 /////////////////////////////////////////////////
