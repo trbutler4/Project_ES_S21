@@ -11,4 +11,4 @@ test_strings = ['55000,3000,\n', '54940,2980,\n', '54990,2950,\n', '54920,3050,\
 while True:
  for s in test_strings:
      write(s)
-     time.sleep(10) 
+     time.sleep(8) 

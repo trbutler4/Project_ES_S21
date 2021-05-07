@@ -23,7 +23,7 @@ parameters = {
 }
 headers = {
   'Accepts': 'application/json',
-  'X-CMC_PRO_API_KEY': TEST_KEY,  # change to API_KEY for real data
+  'X-CMC_PRO_API_KEY': API_KEY,  # change to API_KEY for real data
 }
 
 session = Session()
@@ -31,7 +31,7 @@ session.headers.update(headers)
 
 def getData():
   try:
-    response = session.get(TEST_URL, params=parameters) # change to API_URL for real data
+    response = session.get(API_URL, params=parameters) # change to API_URL for real data
     data = json.loads(response.text)
     return data
   except (ConnectionError, Timeout, TooManyRedirects) as e:
@@ -63,14 +63,14 @@ def formatString():
   toSend = ''
   for i in range(0,2):
     price = data['data'][i]['quote']['USD']['price']
-    toSend = toSend + str(round(price)) + ','
+    toSend = toSend + str(round(price, 2)) + ','
   toSend = toSend + '\n'
   return toSend
 
 
 while True:
  write(formatString())
- time.sleep(30)
+ time.sleep(5)
 
 
 
