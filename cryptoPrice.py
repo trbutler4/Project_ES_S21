@@ -29,6 +29,7 @@ headers = {
 session = Session()
 session.headers.update(headers)
 
+# retreives price data
 def getData():
   try:
     response = session.get(API_URL, params=parameters) # change to API_URL for real data
@@ -37,27 +38,13 @@ def getData():
   except (ConnectionError, Timeout, TooManyRedirects) as e:
     print(e)
 
-#BTC_data = data['data'][0] # Bitcoin data
-#ETH_data = data['data'][1] # Ethereum data
-
-#BTC_price = BTC_data['quote']['USD']['price'] # get BTC price
-#ETH_price = ETH_data['quote']['USD']['price'] # get ETH price
-
-
-#print('BTC: ', BTC_price, '\n') # print BTC price
-#print('ETH: ', ETH_price, '\n') # print ETH price
-###################
-
-##################
-# Serial stuff
 arduino = serial.Serial(port = 'COM4', baudrate=9600, timeout = .1)
+# sends string to HC-06
 def write(x):
     arduino.write(bytes(x, 'utf-8'))
     time.sleep(0.05)
 
-#####################
-
-
+# gets data and formats into string
 def formatString():
   data = getData()
   toSend = ''
@@ -67,7 +54,7 @@ def formatString():
   toSend = toSend + '\n'
   return toSend
 
-
+# continually send price data
 while True:
  write(formatString())
  time.sleep(5)
