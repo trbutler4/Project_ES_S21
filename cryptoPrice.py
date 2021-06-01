@@ -3,7 +3,7 @@ from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
 
 # real data
-API_KEY = 'e4e16906-0114-410b-85c3-9f7a978e0500'
+API_KEY = ''
 API_URL = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
 
 # sandbox data
